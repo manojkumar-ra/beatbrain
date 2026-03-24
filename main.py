@@ -249,11 +249,16 @@ async def api_identify(audio: UploadFile = File(...)):
 def api_analyze(req: AnalyzeRequest):
     print(f"analyzing song: {req.song_name} by {req.artist}")
 
-    lyrics_result = analyze_lyrics(req.song_name, req.artist)
-    print(f"lyrics result keys: {lyrics_result.keys()}")
-
+    # do mood first since its faster (less tokens)
     mood_result = detect_mood(req.song_name, req.artist)
     print(f"mood result keys: {mood_result.keys()}")
+
+    # small gap so groq doesnt rate limit us
+    import time
+    time.sleep(1)
+
+    lyrics_result = analyze_lyrics(req.song_name, req.artist)
+    print(f"lyrics result keys: {lyrics_result.keys()}")
 
     if "error" in lyrics_result and "error" in mood_result:
         return {"success": False, "message": "Could not connect to AI service"}

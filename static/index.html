@@ -752,6 +752,10 @@
             panel.classList.add('show');
             document.getElementById('analysisLoader').classList.add('show');
             document.getElementById('analysisContent').style.display = 'none';
+            // reset previous results
+            document.getElementById('lyricsAnalysis').textContent = 'Analyzing...';
+            document.getElementById('moodDescription').textContent = '';
+            document.getElementById('moodBadge').textContent = '';
             panel.scrollIntoView({ behavior: 'smooth' });
 
             fetch(API_BASE + '/api/analyze', {
@@ -803,6 +807,8 @@
 
             if (data.lyrics_analysis) {
                 document.getElementById('lyricsAnalysis').innerHTML = data.lyrics_analysis.replace(/\n/g, '<br>');
+            } else {
+                document.getElementById('lyricsAnalysis').textContent = 'Lyrics analysis not available for this song.';
             }
 
             if (data.similar_songs && data.similar_songs.length > 0) {
