@@ -805,13 +805,14 @@
                 updateMoodDistribution();
             }
 
+            // render lyrics first
             if (data.lyrics_analysis) {
                 document.getElementById('lyricsAnalysis').innerHTML = data.lyrics_analysis.replace(/\n/g, '<br>');
             } else {
                 document.getElementById('lyricsAnalysis').textContent = 'Lyrics analysis not available for this song.';
             }
 
-            if (data.similar_songs && data.similar_songs.length > 0) {
+            if (data.similar_songs && Array.isArray(data.similar_songs) && data.similar_songs.length > 0) {
                 const list = document.getElementById('similarSongs');
                 list.innerHTML = '';
                 data.similar_songs.forEach(s => {

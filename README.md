@@ -4,7 +4,7 @@ An AI-powered music platform that identifies songs, analyzes lyrics, detects moo
 
 ## What it does
 
-- **Song Identification** - Upload an audio file or record directly from browser to identify any song (powered by AudD)
+- **Song Identification** - Upload an audio file or record directly from browser to identify any song (powered by Shazam)
 - **AI Lyrics Analysis** - Get a detailed breakdown of what the lyrics actually mean
 - **Mood Detection** - AI figures out the mood, energy level and emotional vibe of any song
 - **Smart Playlist Generator** - Describe a vibe and AI creates a 10-song playlist for you
@@ -15,14 +15,27 @@ An AI-powered music platform that identifies songs, analyzes lyrics, detects moo
 
 - **Backend**: Python, FastAPI
 - **AI**: Groq API (Llama 3.3 70B)
-- **Song Recognition**: AudD API
+- **Song Recognition**: Shazam (reverse-engineered API)
 - **Music Search**: iTunes Search API
 - **Database**: MySQL
 - **Frontend**: HTML, CSS, JavaScript (single page app)
 
 ## Screenshots
 
-*screenshots coming soon*
+### Hero
+![Hero](screenshots/hero.png)
+
+### Song Identifier
+![Identify](screenshots/identify.png)
+
+### Search
+![Search](screenshots/search.png)
+
+### AI Analysis (Mood + Lyrics)
+![Analysis](screenshots/analysis.png)
+
+### AI Playlist Generator
+![Playlist](screenshots/playlist.png)
 
 ## Setup
 
@@ -40,7 +53,6 @@ Create a `.env` file:
 
 ```
 GROQ_API_KEY=your_groq_api_key
-AUDD_API_TOKEN=your_audd_token
 MYSQL_HOST=localhost
 MYSQL_USER=root
 MYSQL_PASSWORD=your_password
@@ -48,7 +60,7 @@ MYSQL_DATABASE=beatbrain
 ```
 
 - Get Groq API key from [console.groq.com](https://console.groq.com)
-- AudD token is optional (works without it for limited requests)
+- Song identification uses Shazam (no API key needed)
 
 ### 3. Make sure MySQL is running
 
@@ -88,7 +100,7 @@ Open `http://localhost:8000` in your browser.
 beatbrain/
 ├── main.py              # FastAPI server and all routes
 ├── analyzer.py          # Groq AI functions (lyrics, mood, playlist, insights)
-├── identifier.py        # Song identification (AudD + ACRCloud fallback)
+├── identifier.py        # Song identification (Shazam + AudD fallback)
 ├── spotify_client.py    # Song search using iTunes API
 ├── database.py          # MySQL connection and queries
 ├── requirements.txt     # Python dependencies
