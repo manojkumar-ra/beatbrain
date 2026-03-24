@@ -8,13 +8,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# uses shazam for song identification (free, no api key needed)
-# audd is there as backup but has limited free requests
+# shazam for song recognition, audd as backup
 
 
 def convert_to_raw_pcm(audio_data):
-    """convert any audio to raw 16khz mono pcm samples using ffmpeg
-    shazam needs this specific format to generate fingerprints"""
+    """shazam needs raw 16khz mono pcm, this converts any audio format to that"""
     try:
         import imageio_ffmpeg
         import subprocess
@@ -61,7 +59,6 @@ def convert_to_raw_pcm(audio_data):
 
 
 def identify_song(audio_data):
-    """takes audio bytes and tries to figure out what song it is"""
 
     # try shazam first - its free and unlimited
     result = try_shazam(audio_data)
@@ -77,7 +74,6 @@ def identify_song(audio_data):
 
 
 def try_shazam(audio_data):
-    """use shazam's api to identify the song (no api key needed)"""
     try:
         from ShazamAPI.algorithm import SignatureGenerator
         from ShazamAPI.signature_format import DecodedMessage
@@ -194,7 +190,6 @@ def try_shazam(audio_data):
 
 
 def try_audd(audio_data):
-    """backup - send audio to audd.io (limited free requests)"""
     try:
         print(f"audd: sending {len(audio_data)} bytes...")
 

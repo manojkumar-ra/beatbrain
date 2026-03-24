@@ -14,11 +14,7 @@ from identifier import identify_song
 from analyzer import analyze_lyrics, detect_mood, generate_playlist, get_insights
 from spotify_client import search_songs
 
-app = FastAPI(
-    title="BeatBrain - AI Music Intelligence",
-    description="Identify songs, analyze lyrics, detect moods and get AI-powered music insights",
-    version="1.0.0"
-)
+app = FastAPI(title="BeatBrain", version="1.0.0")
 
 # allowing all origins for now, need to restrict this later
 app.add_middleware(
@@ -29,18 +25,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# serve the frontend html and css and js files
+# serve frontend files
 os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-# homepage - just serves the html file
 @app.get("/")
 def serve_frontend():
     return FileResponse("static/index.html")
 
 
-# these are the request body models for the post routes
+# request bodies
 class LyricsRequest(BaseModel):
     song_name: str
     artist: str = ""
@@ -59,14 +54,13 @@ class AnalyzeRequest(BaseModel):
     spotify_id: str = ""  # not using this rn but keeping for future
 
 
-# when server starts, setup the database tables
+# setup db when server starts
 @app.on_event("startup")
 def startup():
     print("Starting BeatBrain...")
     init_db()
 
 
-# just to check if server is alive
 @app.get("/health")
 def health_check():
     return {"status": "ok", "message": "BeatBrain is running!"}
@@ -196,9 +190,7 @@ def search(query: str):
     return result
 
 
-# ============================================
-# these are the api routes the frontend calls
-# ============================================
+# ---- frontend api routes ----
 
 @app.get("/api/search")
 def api_search(q: str = ""):

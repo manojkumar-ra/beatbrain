@@ -5,13 +5,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# using groq because its free and fast
-# llama 3.3 70b is the best model they have rn
+# groq is free and fast, using llama 3.3 70b
 MODEL = "llama-3.3-70b-versatile"
 _client = None
 
 def get_client():
-    """only create client once and reuse it"""
     global _client
     if _client is None:
         _client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -19,7 +17,6 @@ def get_client():
 
 
 def analyze_lyrics(song_name, artist=""):
-    """ask ai to break down what the song lyrics mean"""
     try:
         prompt = f"""Analyze the song "{song_name}" by {artist if artist else 'unknown artist'}.
 
@@ -54,7 +51,6 @@ Be insightful but keep it easy to understand. Format nicely with sections."""
 
 
 def detect_mood(song_name, artist=""):
-    """figures out the mood and vibe of a song"""
     try:
         prompt = f"""For the song "{song_name}" by {artist if artist else 'unknown artist'}, detect the mood and emotions.
 
@@ -110,7 +106,6 @@ Return ONLY valid JSON, no extra text."""
 
 
 def generate_playlist(description):
-    """give it a mood description and it makes a 10 song playlist"""
     try:
         prompt = f"""Based on this description: "{description}"
 
@@ -156,7 +151,6 @@ Return ONLY valid JSON."""
 
 
 def get_insights(history):
-    """looks at what you've been listening to and tells you about your taste"""
     if not history or len(history) == 0:
         return {"insights": "No listening history yet! Start identifying some songs to get personalized insights."}
 

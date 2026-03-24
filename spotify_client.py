@@ -6,8 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# song search using itunes api (free, no auth needed)
-# tried spotify first but kept getting 403 so switched to itunes
+# using itunes for search now, spotify kept giving 403
 
 _token_cache = {
     "access_token": None,
@@ -16,7 +15,7 @@ _token_cache = {
 
 
 def get_access_token():
-    """get spotify token - not using this anymore but keeping just in case"""
+    # not using spotify anymore but keeping this just in case
     global _token_cache
 
     if _token_cache["access_token"] and time.time() < _token_cache["expires_at"]:
@@ -50,13 +49,11 @@ def get_access_token():
 
 
 def search_songs(query, limit=10):
-    """main search function - just uses itunes now"""
     print(f"searching: {query}")
     return search_itunes(query, limit)
 
 
 def search_itunes(query, limit=10):
-    """search itunes for songs matching the query"""
     try:
         params = {
             "term": query,
@@ -100,7 +97,6 @@ def search_itunes(query, limit=10):
 
 
 def get_album_art(song_name, artist):
-    """quick search just to get the album cover image"""
     try:
         params = {
             "term": f"{song_name} {artist}",
@@ -121,7 +117,6 @@ def get_album_art(song_name, artist):
 
 
 def get_song_details(track_id):
-    """lookup a specific song by its itunes id"""
     try:
         res = requests.get(f"https://itunes.apple.com/lookup?id={track_id}")
         data = res.json()

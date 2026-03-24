@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# connect to mysql
 def get_connection():
     conn = mysql.connector.connect(
         host=os.getenv('MYSQL_HOST', 'localhost'),
@@ -15,10 +14,9 @@ def get_connection():
     return conn
 
 
-# run this once when server starts to make sure db and tables exist
 def init_db():
     try:
-        # connect without specifying database first so we can create it
+        # need to connect without db first to create it
         conn = mysql.connector.connect(
             host=os.getenv('MYSQL_HOST', 'localhost'),
             user=os.getenv('MYSQL_USER', 'root'),
@@ -52,7 +50,6 @@ def init_db():
         print("is mysql running?")
 
 
-# add identified song to history table
 def save_to_history(song_name, artist, album, mood=None):
     try:
         conn = get_connection()
@@ -68,7 +65,6 @@ def save_to_history(song_name, artist, album, mood=None):
         print(f"couldn't save to history: {e}")
 
 
-# get last 50 songs from history
 def get_history():
     try:
         conn = get_connection()
