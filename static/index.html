@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeatBrain - AI Music Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0a0a0a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 4px; }
+
+        a { color: #ffd700; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* ===== navbar ===== */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 10, 0.95);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+            position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+        .logo {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 1.6rem; font-weight: 700; color: #ffd700;
+        }
+        .logo svg { width: 38px; height: 38px; }
+        .tagline { font-size: 0.7rem; color: #94a3b8; font-weight: 300; letter-spacing: 1.5px; text-transform: uppercase; }
+        .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+        .nav-links a { color: #e2e8f0; font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover { color: #ffd700; text-decoration: none; }
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; }
+        .hamburger span { width: 25px; height: 2px; background: #ffd700; transition: 0.3s; }
+
+        /* ===== hero section ===== */
+        .hero {
+            position: relative;
+            text-align: center;
+            padding: 5rem 2rem 4rem;
+            background: radial-gradient(ellipse at center, rgba(255,215,0,0.06) 0%, transparent 70%);
+            overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(255,215,0,0.04) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 50%, rgba(255,215,0,0.03) 0%, transparent 50%);
+            z-index: 0;
+        }
+        .hero-content { position: relative; z-index: 1; }
+        .hero h1 {
+            font-size: 3.5rem; font-weight: 800;
+            background: linear-gradient(135deg, #ffd700, #ffaa00, #ffd700);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 0.8rem;
+        }
+        .hero p { font-size: 1.2rem; color: #94a3b8; max-width: 550px; margin: 0 auto 2rem; }
+        .hero-btn {
+            padding: 1rem 2.5rem; border: none; border-radius: 50px;
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #0a0a0a; font-family: 'Poppins'; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 0 30px rgba(255,215,0,0.3);
+        }
+        .hero-btn:hover { transform: translateY(-3px); box-shadow: 0 0 50px rgba(255,215,0,0.5); }
+
+        /* waveform animation */
+        .waveform {
+            display: flex; align-items: center; justify-content: center;
+            gap: 4px; height: 60px; margin: 2rem auto 0;
+        }
+        .waveform .bar {
+            width: 4px; background: linear-gradient(to top, #ffd700, #ffaa00);
+            border-radius: 2px; animation: wave 1.2s ease-in-out infinite;
+        }
+        .waveform .bar:nth-child(1) { height: 20px; animation-delay: 0s; }
+        .waveform .bar:nth-child(2) { height: 35px; animation-delay: 0.1s; }
+        .waveform .bar:nth-child(3) { height: 50px; animation-delay: 0.2s; }
+        .waveform .bar:nth-child(4) { height: 30px; animation-delay: 0.3s; }
+        .waveform .bar:nth-child(5) { height: 45px; animation-delay: 0.4s; }
+        .waveform .bar:nth-child(6) { height: 25px; animation-delay: 0.5s; }
+        .waveform .bar:nth-child(7) { height: 40px; animation-delay: 0.6s; }
+        .waveform .bar:nth-child(8) { height: 15px; animation-delay: 0.7s; }
+        .waveform .bar:nth-child(9) { height: 35px; animation-delay: 0.8s; }
+        .waveform .bar:nth-child(10) { height: 50px; animation-delay: 0.9s; }
+        .waveform .bar:nth-child(11) { height: 20px; animation-delay: 1.0s; }
+        .waveform .bar:nth-child(12) { height: 40px; animation-delay: 1.1s; }
+
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.4); opacity: 0.5; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+
+        /* recording waveform */
+        .waveform-recording .bar {
+            background: linear-gradient(to top, #ef4444, #ff6b6b) !important;
+            animation-duration: 0.5s !important;
+        }
+
+        /* ===== container ===== */
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; padding-bottom: 100px; }
+
+        /* ===== section titles ===== */
+        .section-title {
+            font-size: 1.5rem; font-weight: 600; margin-bottom: 1.2rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .section-title .gold { color: #ffd700; }
+
+        /* ===== glassmorphism cards ===== */
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px; padding: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.08);
+            backdrop-filter: blur(10px);
+            transition: all 0.35s ease;
+        }
+        .card:hover {
+            border-color: rgba(255, 215, 0, 0.25);
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        /* ===== buttons ===== */
+        .btn {
+            padding: 0.65rem 1.5rem; border: none; border-radius: 10px;
+            font-family: 'Poppins'; font-size: 0.9rem; font-weight: 500;
+            cursor: pointer; transition: all 0.25s; display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #0a0a0a;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(255,215,0,0.35); }
+        .btn-secondary {
+            background: transparent; color: #ffd700;
+            border: 1px solid rgba(255,215,0,0.4);
+        }
+        .btn-secondary:hover { background: rgba(255,215,0,0.08); transform: translateY(-2px); }
+        .btn-sm { padding: 0.45rem 1rem; font-size: 0.8rem; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+        /* ===== identifier ===== */
+        .identifier-section { margin-bottom: 3rem; }
+        .upload-zone {
+            border: 2px dashed rgba(255,215,0,0.25); border-radius: 20px;
+            padding: 3rem 2rem; text-align: center;
+            background: rgba(255,215,0,0.02); transition: all 0.3s; cursor: pointer;
+        }
+        .upload-zone:hover { border-color: rgba(255,215,0,0.5); background: rgba(255,215,0,0.04); }
+        .upload-zone.dragover { border-color: #ffd700; background: rgba(255,215,0,0.06); }
+        .upload-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+        .upload-text { font-size: 1.1rem; color: #94a3b8; margin-bottom: 1.5rem; }
+        .upload-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        #audioFileInput { display: none; }
+
+        /* ===== loaders ===== */
+        .loader { display: none; text-align: center; padding: 2rem; }
+        .loader.show { display: block; }
+        .spinner {
+            width: 40px; height: 40px; margin: 0 auto 1rem;
+            border: 3px solid rgba(255,215,0,0.15); border-top-color: #ffd700;
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text { color: #94a3b8; font-size: 0.95rem; }
+
+        /* ===== song result ===== */
+        .song-result { display: none; margin-top: 1.5rem; }
+        .song-result.show { display: block; }
+        .song-card {
+            display: flex; gap: 1.5rem; align-items: center;
+            background: linear-gradient(135deg, rgba(255,215,0,0.05), rgba(255,215,0,0.02));
+        }
+        .album-art { width: 130px; height: 130px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        .song-info h3 { font-size: 1.3rem; color: #ffd700; }
+        .artist { color: #94a3b8; font-size: 0.95rem; }
+        .album-name { color: #64748b; font-size: 0.85rem; }
+        .song-actions { margin-top: 0.8rem; display: flex; gap: 0.8rem; flex-wrap: wrap; }
+        .spotify-link {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem;
+            background: #1db954; color: white;
+        }
+        .spotify-link:hover { opacity: 0.9; text-decoration: none; }
+
+        /* ===== search ===== */
+        .search-section { margin-bottom: 3rem; }
+        .search-container { display: flex; gap: 0.8rem; margin-bottom: 1rem; }
+        .search-input {
+            flex: 1; padding: 0.8rem 1.2rem; border-radius: 12px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,215,0,0.15);
+            color: #e2e8f0; font-family: 'Poppins'; font-size: 0.95rem; outline: none;
+        }
+        .search-input:focus { border-color: #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.1); }
+        .search-input::placeholder { color: #64748b; }
+        .search-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+        .search-result-card {
+            display: flex; gap: 1rem; align-items: center; cursor: pointer; padding: 1rem;
+        }
+        .search-result-card img { width: 55px; height: 55px; border-radius: 8px; object-fit: cover; }
+        .sr-info h4 { font-size: 0.95rem; color: #e2e8f0; }
+        .sr-info p { font-size: 0.8rem; color: #94a3b8; }
+
+        /* ===== analysis ===== */
+        .analysis-section { display: none; margin-bottom: 3rem; }
+        .analysis-section.show { display: block; }
+        .analysis-grid { display: none; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+        .analysis-grid .card h3 { color: #ffd700; margin-bottom: 0.8rem; font-size: 1.1rem; }
+        .mood-badge {
+            display: inline-block; padding: 0.5rem 1.2rem; border-radius: 20px;
+            font-weight: 600; font-size: 1rem; color: #0a0a0a; background: #ffd700;
+        }
+        .lyrics-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.7; margin-top: 0.5rem; white-space: pre-wrap; }
+
+        /* ===== playlist ===== */
+        .playlist-section { margin-bottom: 3rem; }
+        .vibe-input-group { display: flex; gap: 0.8rem; margin-bottom: 1rem; }
+        .vibe-input {
+            flex: 1; padding: 0.8rem 1.2rem; border-radius: 12px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,215,0,0.15);
+            color: #e2e8f0; font-family: 'Poppins'; font-size: 0.95rem; outline: none;
+        }
+        .vibe-input:focus { border-color: #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.1); }
+        .vibe-input::placeholder { color: #64748b; }
+        .playlist-results { display: none; }
+        .playlist-results.show { display: block; }
+        .playlist-results h3 { color: #ffd700; margin-bottom: 1rem; }
+        .playlist-item {
+            display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255,215,0,0.06);
+        }
+        .playlist-item:last-child { border-bottom: none; }
+        .track-num { color: #ffd700; font-weight: 600; width: 25px; text-align: center; }
+        .playlist-item img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
+        .track-info h4 { font-size: 0.9rem; }
+        .track-info p { font-size: 0.8rem; color: #94a3b8; }
+
+        /* ===== history ===== */
+        .history-section { margin-bottom: 3rem; }
+        .history-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.8rem 0; border-bottom: 1px solid rgba(255,215,0,0.06);
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-item-left { display: flex; gap: 1rem; align-items: center; }
+        .history-item-left img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; }
+        .history-item-left h4 { font-size: 0.9rem; }
+        .history-item-left p { font-size: 0.8rem; color: #94a3b8; }
+        .timestamp { font-size: 0.75rem; color: #64748b; }
+
+        /* ===== stats ===== */
+        .stats-section { margin-bottom: 3rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .stat-card { text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: 700; color: #ffd700; }
+        .stat-label { font-size: 0.8rem; color: #94a3b8; }
+        .mood-bar { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.6rem; }
+        .mood-bar-label { width: 80px; font-size: 0.85rem; color: #94a3b8; text-transform: capitalize; }
+        .mood-bar-track { flex: 1; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
+        .mood-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+        .mood-bar-value { width: 40px; text-align: right; font-size: 0.8rem; color: #ffd700; }
+        .insights-text { color: #cbd5e1; line-height: 1.7; font-size: 0.95rem; margin-top: 0.5rem; white-space: pre-wrap; }
+        .similar-list { list-style: none; }
+        .similar-list li { display: flex; gap: 0.8rem; align-items: center; padding: 0.5rem 0; }
+        .similar-list img { width: 40px; height: 40px; border-radius: 6px; }
+
+        /* ===== sticky player bar ===== */
+        .player-bar {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(10, 10, 10, 0.95);
+            border-top: 1px solid rgba(255,215,0,0.15);
+            backdrop-filter: blur(15px);
+            padding: 0.8rem 2rem;
+            display: none; align-items: center; gap: 1.2rem;
+            z-index: 200;
+        }
+        .player-bar.show { display: flex; }
+        .player-bar img { width: 50px; height: 50px; border-radius: 8px; }
+        .player-info { flex: 1; }
+        .player-info h4 { font-size: 0.9rem; color: #ffd700; }
+        .player-info p { font-size: 0.8rem; color: #94a3b8; }
+        .player-actions { display: flex; gap: 0.8rem; }
+
+        /* ===== empty state ===== */
+        .empty-state { text-align: center; padding: 2rem; color: #64748b; font-size: 0.95rem; }
+
+        /* ===== fade in animation ===== */
+        .fade-in { animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== footer ===== */
+        .footer { text-align: center; padding: 2rem; color: #475569; font-size: 0.8rem; border-top: 1px solid rgba(255,215,0,0.06); }
+
+        /* ===== mobile ===== */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .hero p { font-size: 1rem; }
+            .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; right: 1rem; background: #0a0a0a; border: 1px solid rgba(255,215,0,0.15); border-radius: 12px; padding: 1rem; gap: 0.8rem; }
+            .nav-links.open { display: flex; }
+            .hamburger { display: flex; }
+            .search-results { grid-template-columns: 1fr; }
+            .analysis-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .song-card { flex-direction: column; text-align: center; }
+            .player-bar { padding: 0.6rem 1rem; gap: 0.8rem; }
+            .player-bar img { width: 40px; height: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- navbar -->
+    <nav class="navbar">
+        <div>
+            <div class="logo">
+                <svg viewBox="0 0 40 40" fill="none">
+                    <circle cx="20" cy="20" r="18" stroke="#ffd700" stroke-width="2"/>
+                    <path d="M12 20c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8-8-3.6-8-8z" fill="#ffd700" opacity="0.2"/>
+                    <path d="M15 14c0 0-3 2-3 6s3 6 3 6" stroke="#ffd700" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                    <path d="M25 14c0 0 3 2 3 6s-3 6-3 6" stroke="#ffd700" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                    <circle cx="20" cy="20" r="4" fill="#ffd700"/>
+                    <rect x="8" y="15" width="3" height="10" rx="1.5" fill="#ffd700" opacity="0.6"/>
+                    <rect x="29" y="15" width="3" height="10" rx="1.5" fill="#ffd700" opacity="0.6"/>
+                </svg>
+                BeatBrain
+            </div>
+            <div class="tagline">AI-Powered Music Intelligence</div>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#identify">Identify</a></li>
+            <li><a href="#search">Search</a></li>
+            <li><a href="#playlist">Playlist</a></li>
+            <li><a href="#history">History</a></li>
+            <li><a href="#stats">Insights</a></li>
+        </ul>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- hero -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1>Discover Music with AI</h1>
+            <p>Identify songs, analyze lyrics, detect moods, and generate playlists powered by artificial intelligence.</p>
+            <button class="hero-btn" onclick="document.getElementById('identify').scrollIntoView({behavior:'smooth'})">Start Listening</button>
+            <div class="waveform" id="heroWaveform">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+
+        <!-- song identifier -->
+        <section class="identifier-section" id="identify">
+            <h2 class="section-title"><span class="gold">&#127908;</span> Song Identifier</h2>
+            <div class="upload-zone" id="uploadZone">
+                <div class="upload-icon">&#127911;</div>
+                <div class="upload-text">Drop an audio file here or click to upload</div>
+                <div class="upload-actions">
+                    <button class="btn btn-primary" id="uploadBtn">&#128228; Upload Audio</button>
+                    <button class="btn btn-secondary" id="recordBtn">&#128308; Record</button>
+                </div>
+                <input type="file" id="audioFileInput" accept="audio/*">
+                <!-- waveform for recording state -->
+                <div class="waveform" id="recordWaveform" style="display:none; margin-top:1.5rem;">
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                </div>
+            </div>
+
+            <div class="loader" id="identifyLoader">
+                <div class="spinner"></div>
+                <div class="loader-text">Analyzing audio... &#127925;</div>
+            </div>
+
+            <div class="song-result" id="identifyResult">
+                <div class="card song-card">
+                    <img class="album-art" id="identifiedAlbumArt" src="" alt="Album Art">
+                    <div class="song-info">
+                        <h3 id="identifiedTitle">Song Name</h3>
+                        <p class="artist" id="identifiedArtist">Artist Name</p>
+                        <p class="album-name" id="identifiedAlbum">Album Name</p>
+                        <div class="song-actions">
+                            <a class="spotify-link" id="identifiedSpotifyLink" href="#" target="_blank">&#127925; Open in Spotify</a>
+                            <button class="btn btn-primary btn-sm" onclick="analyzeCurrentSong()">&#129504; AI Analysis</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- search -->
+        <section class="search-section" id="search">
+            <h2 class="section-title"><span class="gold">&#128269;</span> Search Songs</h2>
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search for a song, artist, or album...">
+                <button class="btn btn-primary" id="searchBtn">Search</button>
+            </div>
+            <div class="loader" id="searchLoader"><div class="spinner"></div><div class="loader-text">Searching...</div></div>
+            <div class="search-results" id="searchResults"></div>
+        </section>
+
+        <!-- ai analysis -->
+        <section class="analysis-section" id="analysisPanel">
+            <h2 class="section-title"><span class="gold">&#129504;</span> AI Analysis</h2>
+            <div class="loader" id="analysisLoader"><div class="spinner"></div><div class="loader-text">AI is thinking... &#10024;</div></div>
+            <div class="analysis-grid" id="analysisContent">
+                <div class="card">
+                    <h3>&#127912; Mood Detection</h3>
+                    <div id="moodResult"><div class="mood-badge" id="moodBadge">-</div></div>
+                    <p class="lyrics-text" id="moodDescription"></p>
+                </div>
+                <div class="card">
+                    <h3>&#128220; Lyrics Analysis</h3>
+                    <p class="lyrics-text" id="lyricsAnalysis">Select a song to see AI-powered lyrics interpretation.</p>
+                </div>
+                <div class="card" style="grid-column: span 2;">
+                    <h3>&#127926; Similar Songs</h3>
+                    <ul class="similar-list" id="similarSongs">
+                        <li style="color: #64748b;">Analyze a song to see recommendations</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- playlist -->
+        <section class="playlist-section" id="playlist">
+            <h2 class="section-title"><span class="gold">&#127926;</span> AI Playlist Generator</h2>
+            <div class="vibe-input-group">
+                <input type="text" class="vibe-input" id="vibeInput" placeholder="Describe your vibe... (e.g., 'late night driving', 'rainy day sad songs')">
+                <button class="btn btn-primary" id="generatePlaylistBtn">&#10024; Generate</button>
+            </div>
+            <div class="loader" id="playlistLoader"><div class="spinner"></div><div class="loader-text">Curating your perfect playlist...</div></div>
+            <div class="playlist-results card" id="playlistResults">
+                <h3 id="playlistTitle"></h3>
+                <div id="playlistTracks"></div>
+            </div>
+        </section>
+
+        <!-- history -->
+        <section class="history-section" id="history">
+            <h2 class="section-title"><span class="gold">&#128336;</span> History</h2>
+            <div class="card">
+                <div class="history-list" id="historyList">
+                    <div class="empty-state" id="historyEmpty">No songs searched yet. Start exploring! &#127925;</div>
+                </div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn btn-secondary" id="getInsightsBtn" style="display: none;">&#129504; Get AI Insights</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- stats -->
+        <section class="stats-section" id="stats">
+            <h2 class="section-title"><span class="gold">&#128202;</span> Listening Insights</h2>
+            <div class="stats-grid">
+                <div class="card stat-card">
+                    <div class="stat-number" id="totalSearched">0</div>
+                    <div class="stat-label">Songs Explored</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-number" id="topGenre">-</div>
+                    <div class="stat-label">Likely Favorite Genre</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-number" id="avgMood">-</div>
+                    <div class="stat-label">Average Mood</div>
+                </div>
+            </div>
+            <div class="card" style="margin-top: 1.25rem;">
+                <h3 style="margin-bottom: 0.75rem; color: #ffd700;">Mood Distribution</h3>
+                <div class="mood-distribution" id="moodDistribution">
+                    <div class="empty-state">Search and analyze songs to see your mood distribution</div>
+                </div>
+            </div>
+            <div class="card" style="margin-top: 1.25rem;">
+                <h3 style="color: #ffd700;">&#10024; AI Insights</h3>
+                <div class="insights-text" id="aiInsightsText">
+                    Explore more songs to unlock personalized AI insights about your music taste!
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- sticky player bar -->
+    <div class="player-bar" id="playerBar">
+        <img id="playerArt" src="" alt="">
+        <div class="player-info">
+            <h4 id="playerTitle">-</h4>
+            <p id="playerArtist">-</p>
+        </div>
+        <div class="player-actions">
+            <button class="btn btn-primary btn-sm" onclick="analyzeCurrentSong()">&#129504; Analyze</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>BeatBrain &copy; 2025 &bull; AI-Powered Music Intelligence &bull; Built with &#128155;</p>
+    </div>
+
+
+    <script>
+        // state
+        let currentSong = null;
+        let searchHistory = [];
+        let moodCounts = {};
+        let searchTimeout = null;
+        const API_BASE = '';
+
+        // hamburger menu
+        document.getElementById('hamburgerBtn').addEventListener('click', function() {
+            document.getElementById('navLinks').classList.toggle('open');
+        });
+
+        // file upload
+        const uploadZone = document.getElementById('uploadZone');
+        const audioFileInput = document.getElementById('audioFileInput');
+
+        document.getElementById('uploadBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            audioFileInput.click();
+        });
+
+        uploadZone.addEventListener('click', function() {
+            audioFileInput.click();
+        });
+
+        // recording
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        const recordBtn = document.getElementById('recordBtn');
+        const recordWaveform = document.getElementById('recordWaveform');
+
+        recordBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        });
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function(stream) {
+                audioChunks = [];
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = function(event) {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = function() {
+                    stream.getTracks().forEach(t => t.stop());
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    handleAudioUpload(audioBlob);
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                recordBtn.innerHTML = '&#9632; Stop';
+                recordBtn.style.background = '#ef4444';
+                recordBtn.style.color = '#fff';
+                recordBtn.style.borderColor = '#ef4444';
+
+                // show recording waveform
+                recordWaveform.style.display = 'flex';
+                recordWaveform.classList.add('waveform-recording');
+
+                setTimeout(function() {
+                    if (isRecording) stopRecording();
+                }, 10000);
+            })
+            .catch(function(err) {
+                console.error('mic error:', err);
+                alert('Could not access microphone. Please allow mic access.');
+            });
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            isRecording = false;
+            recordBtn.innerHTML = '&#128308; Record';
+            recordBtn.style.background = '';
+            recordBtn.style.color = '';
+            recordBtn.style.borderColor = '';
+            recordWaveform.style.display = 'none';
+            recordWaveform.classList.remove('waveform-recording');
+        }
+
+        // drag and drop
+        uploadZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) handleAudioUpload(e.dataTransfer.files[0]);
+        });
+
+        audioFileInput.addEventListener('change', function() {
+            if (this.files.length > 0) handleAudioUpload(this.files[0]);
+        });
+
+        function handleAudioUpload(file) {
+            document.getElementById('identifyLoader').classList.add('show');
+            document.getElementById('identifyResult').classList.remove('show');
+
+            const formData = new FormData();
+            formData.append('audio', file);
+
+            fetch(API_BASE + '/api/identify', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('identifyLoader').classList.remove('show');
+                if (data.success && data.song) {
+                    displayIdentifiedSong(data.song);
+                } else {
+                    alert(data.message || 'Could not identify the song. Try a longer clip!');
+                }
+            })
+            .catch(err => {
+                document.getElementById('identifyLoader').classList.remove('show');
+                alert('Error identifying song. Is the server running?');
+            });
+        }
+
+        function displayIdentifiedSong(song) {
+            currentSong = song;
+            document.getElementById('identifiedAlbumArt').src = song.album_art || '';
+            document.getElementById('identifiedTitle').textContent = song.name || 'Unknown';
+            document.getElementById('identifiedArtist').textContent = song.artist || 'Unknown Artist';
+            document.getElementById('identifiedAlbum').textContent = song.album || '';
+
+            const spotifyLink = document.getElementById('identifiedSpotifyLink');
+            if (song.spotify_url) {
+                spotifyLink.href = song.spotify_url;
+                spotifyLink.style.display = 'inline-flex';
+            } else {
+                spotifyLink.style.display = 'none';
+            }
+
+            document.getElementById('identifyResult').classList.add('show');
+            addToHistory(song);
+            updatePlayerBar(song);
+        }
+
+        // sticky player bar
+        function updatePlayerBar(song) {
+            document.getElementById('playerArt').src = song.album_art || '';
+            document.getElementById('playerTitle').textContent = song.name || '-';
+            document.getElementById('playerArtist').textContent = song.artist || '-';
+            document.getElementById('playerBar').classList.add('show');
+        }
+
+        // search
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (searchInput.value.trim().length > 2) performSearch(searchInput.value.trim());
+            }, 500);
+        });
+
+        searchBtn.addEventListener('click', function() {
+            if (searchInput.value.trim()) performSearch(searchInput.value.trim());
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim()) {
+                clearTimeout(searchTimeout);
+                performSearch(searchInput.value.trim());
+            }
+        });
+
+        function performSearch(query) {
+            document.getElementById('searchLoader').classList.add('show');
+            document.getElementById('searchResults').innerHTML = '';
+
+            fetch(API_BASE + '/api/search?q=' + encodeURIComponent(query))
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('searchLoader').classList.remove('show');
+                    if (data.results && data.results.length > 0) {
+                        renderSearchResults(data.results);
+                    } else {
+                        document.getElementById('searchResults').innerHTML = '<div class="empty-state">No results found. Try different keywords.</div>';
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('searchLoader').classList.remove('show');
+                    document.getElementById('searchResults').innerHTML = '<div class="empty-state">Error searching.</div>';
+                });
+        }
+
+        function renderSearchResults(results) {
+            const container = document.getElementById('searchResults');
+            container.innerHTML = '';
+            results.forEach(function(song) {
+                const card = document.createElement('div');
+                card.className = 'card search-result-card fade-in';
+                card.innerHTML = `
+                    <img src="${song.album_art || ''}" alt="">
+                    <div class="sr-info">
+                        <h4>${escapeHtml(song.name)}</h4>
+                        <p>${escapeHtml(song.artist)}</p>
+                    </div>
+                `;
+                card.addEventListener('click', () => selectSong(song));
+                container.appendChild(card);
+            });
+        }
+
+        function selectSong(song) {
+            currentSong = song;
+            displayIdentifiedSong(song);
+            document.getElementById('identify').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ai analysis
+        function analyzeCurrentSong() {
+            if (!currentSong) { alert('No song selected!'); return; }
+
+            const panel = document.getElementById('analysisPanel');
+            panel.classList.add('show');
+            document.getElementById('analysisLoader').classList.add('show');
+            document.getElementById('analysisContent').style.display = 'none';
+            panel.scrollIntoView({ behavior: 'smooth' });
+
+            fetch(API_BASE + '/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    song_name: currentSong.name,
+                    artist: currentSong.artist,
+                    spotify_id: currentSong.spotify_id || ""
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('analysisLoader').classList.remove('show');
+                document.getElementById('analysisContent').style.display = 'grid';
+                if (data.success) renderAnalysis(data);
+                else alert('Analysis failed: ' + (data.message || 'Unknown error'));
+            })
+            .catch(err => {
+                document.getElementById('analysisLoader').classList.remove('show');
+                document.getElementById('analysisContent').style.display = 'grid';
+                document.getElementById('lyricsAnalysis').textContent = 'Could not connect to AI service.';
+            });
+        }
+
+        function renderAnalysis(data) {
+            if (data.mood) {
+                const moodObj = data.mood;
+                const moodName = moodObj.primary_mood || 'unknown';
+                const moodBadge = document.getElementById('moodBadge');
+                const moodEmojis = {
+                    'happy': '😊', 'sad': '😢', 'energetic': '⚡', 'chill': '😌',
+                    'dark': '🖤', 'romantic': '💕', 'melancholic': '😔', 'upbeat': '🎉',
+                    'nostalgic': '🌅', 'peaceful': '☮️', 'angry': '😤', 'hopeful': '🌟',
+                    'playful': '🤪', 'devotional': '🙏', 'festive': '🎊'
+                };
+                moodBadge.textContent = (moodEmojis[moodName.toLowerCase()] || '🎵') + ' ' + moodName;
+                moodBadge.style.background = moodObj.color_code || '#ffd700';
+
+                var descText = moodObj.description || '';
+                if (moodObj.energy_level) descText += '\nEnergy: ' + moodObj.energy_level;
+                if (moodObj.best_for) descText += '\nBest for: ' + moodObj.best_for;
+                document.getElementById('moodDescription').textContent = descText;
+
+                let m = moodName.toLowerCase();
+                moodCounts[m] = (moodCounts[m] || 0) + 1;
+                updateMoodDistribution();
+            }
+
+            if (data.lyrics_analysis) {
+                document.getElementById('lyricsAnalysis').innerHTML = data.lyrics_analysis.replace(/\n/g, '<br>');
+            }
+
+            if (data.similar_songs && data.similar_songs.length > 0) {
+                const list = document.getElementById('similarSongs');
+                list.innerHTML = '';
+                data.similar_songs.forEach(s => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <img src="${s.album_art || ''}" alt="">
+                        <div><strong>${escapeHtml(s.name)}</strong> <span style="color:#94a3b8">- ${escapeHtml(s.artist)}</span></div>
+                    `;
+                    list.appendChild(li);
+                });
+            }
+        }
+
+        // playlist
+        const vibeInput = document.getElementById('vibeInput');
+        document.getElementById('generatePlaylistBtn').addEventListener('click', generatePlaylist);
+        vibeInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') generatePlaylist(); });
+
+        function generatePlaylist() {
+            const vibe = vibeInput.value.trim();
+            if (!vibe) { alert('Describe your vibe first!'); return; }
+
+            document.getElementById('playlistLoader').classList.add('show');
+            document.getElementById('playlistResults').classList.remove('show');
+
+            fetch(API_BASE + '/api/playlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ vibe: vibe })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('playlistLoader').classList.remove('show');
+                if (data.success && data.tracks) renderPlaylist(data.tracks, vibe);
+                else alert('Could not generate playlist. Try again?');
+            })
+            .catch(err => {
+                document.getElementById('playlistLoader').classList.remove('show');
+                alert('Error generating playlist.');
+            });
+        }
+
+        function renderPlaylist(tracks, vibe) {
+            document.getElementById('playlistTitle').textContent = '✨ Playlist: "' + vibe + '"';
+            const container = document.getElementById('playlistTracks');
+            container.innerHTML = '';
+            tracks.forEach(function(track, i) {
+                const item = document.createElement('div');
+                item.className = 'playlist-item fade-in';
+                item.style.animationDelay = (i * 0.05) + 's';
+                item.innerHTML = `
+                    <span class="track-num">${i + 1}</span>
+                    <img src="${track.album_art || ''}" alt="">
+                    <div class="track-info"><h4>${escapeHtml(track.name)}</h4><p>${escapeHtml(track.artist)}</p></div>
+                `;
+                container.appendChild(item);
+            });
+            document.getElementById('playlistResults').classList.add('show');
+        }
+
+        // history
+        function addToHistory(song) {
+            if (searchHistory.find(s => s.name === song.name && s.artist === song.artist)) return;
+            song.timestamp = new Date().toLocaleString();
+            searchHistory.unshift(song);
+            if (searchHistory.length > 20) searchHistory.pop();
+            renderHistory();
+            updateStats();
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            const emptyState = document.getElementById('historyEmpty');
+            if (searchHistory.length === 0) { emptyState.style.display = 'block'; return; }
+            emptyState.style.display = 'none';
+            list.querySelectorAll('.history-item').forEach(el => el.remove());
+            searchHistory.forEach(function(song) {
+                const item = document.createElement('div');
+                item.className = 'history-item fade-in';
+                item.innerHTML = `
+                    <div class="history-item-left">
+                        <img src="${song.album_art || ''}" alt="">
+                        <div><h4>${escapeHtml(song.name)}</h4><p>${escapeHtml(song.artist)}</p></div>
+                    </div>
+                    <span class="timestamp">${song.timestamp || ''}</span>
+                `;
+                list.insertBefore(item, emptyState);
+            });
+            if (searchHistory.length >= 3) document.getElementById('getInsightsBtn').style.display = 'inline-flex';
+        }
+
+        // insights
+        document.getElementById('getInsightsBtn').addEventListener('click', function() {
+            if (searchHistory.length < 3) { alert('Explore at least 3 songs first!'); return; }
+            const songs = searchHistory.map(s => ({ name: s.name, artist: s.artist }));
+            this.disabled = true; this.textContent = 'Analyzing...';
+
+            fetch(API_BASE + '/api/insights', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ songs: songs })
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.disabled = false; this.textContent = '🧠 Get AI Insights';
+                if (data.success && data.insights) {
+                    document.getElementById('aiInsightsText').textContent = data.insights;
+                    if (data.top_genre) document.getElementById('topGenre').textContent = data.top_genre;
+                    if (data.avg_mood) document.getElementById('avgMood').textContent = data.avg_mood;
+                    document.getElementById('stats').scrollIntoView({ behavior: 'smooth' });
+                }
+            })
+            .catch(err => { this.disabled = false; this.textContent = '🧠 Get AI Insights'; });
+        });
+
+        // stats
+        function updateStats() { document.getElementById('totalSearched').textContent = searchHistory.length; }
+
+        function updateMoodDistribution() {
+            const container = document.getElementById('moodDistribution');
+            container.innerHTML = '';
+            const total = Object.values(moodCounts).reduce((a, b) => a + b, 0);
+            if (total === 0) return;
+            const colors = { 'happy': '#10b981', 'sad': '#3b82f6', 'energetic': '#ffd700', 'chill': '#a855f7', 'dark': '#ef4444', 'romantic': '#ec4899' };
+            for (const [mood, count] of Object.entries(moodCounts)) {
+                const pct = Math.round((count / total) * 100);
+                const bar = document.createElement('div');
+                bar.className = 'mood-bar';
+                bar.innerHTML = `
+                    <span class="mood-bar-label">${mood}</span>
+                    <div class="mood-bar-track"><div class="mood-bar-fill" style="width:${pct}%;background:${colors[mood]||'#ffd700'}"></div></div>
+                    <span class="mood-bar-value">${pct}%</span>
+                `;
+                container.appendChild(bar);
+            }
+            let topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0];
+            if (topMood) document.getElementById('avgMood').textContent = topMood[0].charAt(0).toUpperCase() + topMood[0].slice(1);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // smooth scroll nav
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('navLinks').classList.remove('open');
+            });
+        });
+
+        document.addEventListener('click', function(e) {
+            const nav = document.getElementById('navLinks');
+            const btn = document.getElementById('hamburgerBtn');
+            if (!nav.contains(e.target) && !btn.contains(e.target)) nav.classList.remove('open');
+        });
+    </script>
+
+</body>
+</html>

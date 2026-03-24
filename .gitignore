@@ -1,0 +1,22 @@
+# env stuff
+.env
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# uploads
+uploads/
+*.mp3
+*.wav
+*.flac
